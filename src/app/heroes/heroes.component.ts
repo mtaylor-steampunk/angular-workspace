@@ -1,22 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgFor } from '@angular/common';
 import { Hero } from '../hero';
 // import { HEROES } from '../mock-heroes';
 import { HeroService } from '../hero.service';
+import { MessageService } from '../message.service';
 @Component({
   selector: 'app-heroes',
   templateUrl: './heroes.component.html',
   styleUrl: './heroes.component.css',
-  // standalone: true,
-  // imports: [
-  //   NgFor
-  // ]
 })
-export class HeroesComponent {
-  // heroes = HEROES;
+export class HeroesComponent implements OnInit {
+  heroes: Hero[] = [];
 
-  constructor(private heroService: HeroService) {
+  constructor(private heroService: HeroService, private messageService: MessageService) {
+  }
 
+  ngOnInit(): void {
+    this.getHeroes();
   }
 
   getHeroes() {
@@ -24,14 +24,17 @@ export class HeroesComponent {
       .subscribe(heroes => this.heroes = heroes)
   }
 
-  ngOnInit() {
-    this.getHeroes();
+  add(name: string): void {
+    name = name.trim();
+    if (!name) { return; }
+    this.heroService.addHero({ name } as Hero)
+      .subscribe(hero => {
+        this.heroes.push(hero);
+      });
   }
 
-  heroes: Hero[] = [];
-  selectedHero?: Hero;
-
-  onSelect(hero: Hero) {
-    this.selectedHero = hero;
+  delete(hero: Hero): void {
+    this.heroes = this.heroes.filter(h => h !== hero);
+    this.heroService.deleteHero(hero.id).subscribe();
   }
 }
